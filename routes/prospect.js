@@ -5,7 +5,6 @@ var router = express.Router();
 const sql = require('mssql');
 const db = require('../config/db');
 
-/* GET users listing. */
 router.get('/activities/:id', (req, res, next) => {
   sql.connect(db, (err) => {
     if (err) console.log(err);
