@@ -1,7 +1,8 @@
-const db =
-    {
-        connectionString: 'Driver=SQL Server;Server=DESKTOP-LSE33F7;Database=ProDB_BWC;Trusted_Connection=true;'
-    };
-
+const db = {
+  user: 'berezhnoj',
+  password: '123456789',
+  server: 'localhost',
+  database: 'ProDB_BWC'
+};
 
 module.exports = db;
