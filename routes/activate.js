@@ -2,28 +2,29 @@ const express = require('express');
 
 const router = express.Router();
 const multer = require('multer');
+
 const upload = multer();
 
 const sql = require('mssql');
 const db = require('../config/db');
 
-router.get('/activities/:id', (req, res, next) => {
-  sql.connect(db, (err) => {
-    if (err) console.log(err);
-    const request = new sql.Request();
-    request
-      .input('id', sql.VarChar, req.params.id)
-      .query('select ca.*,cc.name,pu.[ФИО] as fio from crm_activity ca left join crm_clients cc on ca.client_id = cc.client_id left join pro_users pu on pu.counter = ca.creator_uid where ca.client_id = @id and act_result is not null order by act_start_time desc', (error, result) => {
-        if (error) {
-          console.log(error);
-          res.send(error);
-        }
-        // var rowsCount = result.rowsAffected;
-        sql.close();
-        res.send(result.recordset[0]);
-      }); // request.query
-  }); // sql.conn
-});
+// router.get('/activities/:id', (req, res, next) => {
+//   sql.connect(db, (err) => {
+//     if (err) console.log(err);
+//     const request = new sql.Request();
+//     request
+//       .input('id', sql.VarChar, req.params.id)
+//       .query('select ca.*,cc.name,pu.[ФИО] as fio from crm_activity ca left join crm_clients cc on ca.client_id = cc.client_id left join pro_users pu on pu.counter = ca.creator_uid where ca.client_id = @id and act_result is not null order by act_start_time desc', (error, result) => {
+//         if (error) {
+//           console.log(error);
+//           res.send(error);
+//         }
+//         // var rowsCount = result.rowsAffected;
+//         sql.close();
+//         res.send(result.recordset[0]);
+//       }); // request.query
+//   }); // sql.conn
+// });
 router.get('/activators', (req, res, next) => {
   sql.connect(db, (err) => {
     if (err) console.log(err);
@@ -57,7 +58,22 @@ router.get('/activators', (req, res, next) => {
       }); // request.query
   }); // sql.conn
 });
-
+router.get('/status-history/:id', (req, res, next) => {
+  sql.connect(db, (err) => {
+    if (err) console.log(err);
+    const request = new sql.Request();
+    request
+      .input('id', sql.VarChar, req.params.id)
+      .query('select ccas.*,pu.[ФИО] as fio from corp_client_activator_status ccas left join pro_users pu on pu.counter = ccas.portal_counter where client_id = @id order by id desc', (error, result) => {
+        if (error) {
+          console.log(error);
+          res.send(error);
+        }
+        sql.close();
+        res.send(result.recordset);
+      });
+  });
+});
 router.post('/save_client_status', upload.none(), (req, res, next) => {
   sql.connect(db, (err) => {
     if (err) console.log(err);
@@ -66,7 +82,7 @@ router.post('/save_client_status', upload.none(), (req, res, next) => {
       .input('id', sql.Int, req.query.id)
       .input('portalCounter', sql.Int, req.query.portalCounter)
       .input('status', sql.Int, req.body.status)
-      .input('comment', sql.VarChar, req.body.comment)
+      .input('comment', sql.NVarChar, req.body.comment)
       .query('insert into corp_client_activator_status (client_id, status, comment, portal_counter) values (@id, @status, @comment, @portalCounter)', (error, result) => {
         if (error) {
           console.log(error);
